@@ -106,14 +106,25 @@ const countryData = {
 };
 
 const tabs = [...document.querySelectorAll('[data-country]')];
+const mapNodes = [...document.querySelectorAll('.map-node')];
 
 function selectCountry(tab) {
-  const c = countryData[tab.dataset.country];
+  const countryKey = tab.dataset.country;
+  const c = countryData[countryKey];
+  
+  // Update Tabs
   tabs.forEach(t => {
     const isSelected = t === tab;
     t.setAttribute('aria-selected', String(isSelected));
     t.tabIndex = isSelected ? 0 : -1;
   });
+
+  // Update SVG Map Nodes
+  mapNodes.forEach(node => {
+    const isNodeActive = node.dataset.targetCountry === countryKey;
+    node.classList.toggle('active', isNodeActive);
+  });
+
   document.querySelector('#country-panel').setAttribute('aria-labelledby', tab.id);
   for (const field of ['code', 'role', 'name', 'description']) {
     document.querySelector('#country-' + field).textContent = c[field];
@@ -129,6 +140,15 @@ function selectCountry(tab) {
     link.removeAttribute('rel');
   }
 }
+
+// Map Node Click Listeners
+mapNodes.forEach(node => {
+  node.addEventListener('click', () => {
+    const targetKey = node.dataset.targetCountry;
+    const matchingTab = tabs.find(t => t.dataset.country === targetKey);
+    if (matchingTab) selectCountry(matchingTab);
+  });
+});
 
 tabs.forEach((tab, index) => {
   tab.addEventListener('click', () => selectCountry(tab));
